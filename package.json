@@ -1,0 +1,13 @@
+{
+  "name": "alert-redactor",
+  "version": "1.0.0",
+  "description": "Builds alerts that carry no content, only shape",
+  "type": "module",
+  "license": "MIT",
+  "author": "Justin Rhee",
+  "repository": { "type": "git", "url": "https://github.com/justin-rhee/alert-redactor.git" },
+  "engines": { "node": ">=22" },
+  "exports": { ".": "./src/alert-redactor.ts" },
+  "files": ["src", "README.md", "LICENSE", "SECURITY.md"],
+  "scripts": { "test": "bash tests/run.sh" }
+}
