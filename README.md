@@ -29,11 +29,13 @@ There's no package registry entry yet. Copy `src/alert-redactor.ts` and `src/cla
 
 ## What it won't do
 
-It can't stop you from putting real content inside your own lead strings. The vocabulary you hand it's trusted as-is, so if a lead sentence itself contains something it shouldn't, that's a vocabulary problem rather than something this library can catch.
-
-The classifier only recognizes what you tell it to recognize, through the rules you give it. Everything else falls through to your fallback, and the honest default there's unclassified rather than a guess.
-
-`localDetail` produces text meant for a local log file and nothing else, and it must never be sent anywhere. This library has no way to enforce that once you have the string in hand, so keeping it local is on you.
+- stop you putting real content inside your own lead strings, since the vocabulary you
+  hand it is trusted as-is, so a lead sentence carrying something it shouldn't is a
+  vocabulary problem rather than something this can catch
+- recognize anything you haven't given it a rule for, so everything else falls through
+  to your fallback, where the honest default is unclassified rather than a guess
+- keep `localDetail` out of places it shouldn't go, since it builds text meant for a
+  local log file and nothing enforces that once you're holding the string
 
 ## How I tested it
 
@@ -60,4 +62,4 @@ Design decisions and what changed while building it: [docs/ADR.md](docs/ADR.md).
 
 ---
 
-This little tool is one of a handful I pulled out of my own day-to-day agent setup. I use them all myself, so when something breaks I usually notice fast. But if you spot something weird, or just want to ask how it works, open an issue. I read every one. More tools on my [GitHub profile](https://github.com/justin-rhee).
+This little tool is one of a handful I pulled out of my own day-to-day agent setup. I use them all myself, so when something breaks I usually notice fast. But if you run into any issues, or anything that looks off, open an issue. I read every one. More tools on my [GitHub profile](https://github.com/justin-rhee).
