@@ -1,13 +1,40 @@
 {
   "name": "alert-redactor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Builds alerts that carry no content, only shape",
   "type": "module",
-  "license": "MIT",
+  "main": "./dist/alert-redactor.js",
+  "types": "./dist/alert-redactor.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/alert-redactor.d.ts",
+      "import": "./dist/alert-redactor.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "bash tests/run.sh",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build && npm test"
+  },
   "author": "Justin Rhee",
-  "repository": { "type": "git", "url": "https://github.com/justin-rhee/alert-redactor.git" },
-  "engines": { "node": ">=22" },
-  "exports": { ".": "./src/alert-redactor.ts" },
-  "files": ["src", "README.md", "LICENSE", "SECURITY.md"],
-  "scripts": { "test": "bash tests/run.sh" }
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justin-rhee/alert-redactor.git"
+  },
+  "homepage": "https://github.com/justin-rhee/alert-redactor#readme",
+  "bugs": "https://github.com/justin-rhee/alert-redactor/issues",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  }
 }

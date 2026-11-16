@@ -1,11 +1,11 @@
 # alert-redactor
 
-[![tests](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
+[![tests](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/alert-redactor.svg)](https://www.npmjs.com/package/alert-redactor) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
 
 Builds alert messages from caught errors without guessing at the cause or leaking the data that caused them.
 
 ```ts
-import { classifyThrow, exampleRules, exampleFallback } from "./classify-throw.ts";
+import { classifyThrow, exampleRules, exampleFallback } from "alert-redactor";
 
 classifyThrow(new Error("Deployments have been disabled for this project"), exampleRules, exampleFallback);
 // { errorClass: "service_disabled", note: "service_disabled" }
@@ -24,12 +24,11 @@ A sync daemon of mine labeled every push failure the same way, including the hou
 
 ## Install
 
-Copy `src/alert-redactor.ts` and `src/classify-throw.ts` into your project. They're about 230 lines with no dependencies, and run under Node 22 or newer, which reads TypeScript directly.
-
 ```sh
-git clone https://github.com/justin-rhee/alert-redactor
-cp alert-redactor/src/alert-redactor.ts alert-redactor/src/classify-throw.ts your-project/src/
+npm install alert-redactor
 ```
+
+Node 22 or newer. No dependencies. It ships compiled JavaScript with type definitions. Rather vendor it? Copy `src/alert-redactor.ts` and `src/classify-throw.ts` into your project instead: about 230 lines, and Node 22 reads TypeScript directly.
 
 ## How it works
 
