@@ -1,59 +1,66 @@
 # alert-redactor
 
-[![tests](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml)
+[![tests](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml/badge.svg)](https://github.com/justin-rhee/alert-redactor/actions/workflows/test.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![node >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg) ![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)
 
-Two small TypeScript functions for alert text assembled from caught exceptions: **classify the exception honestly or fall back to unclassified**, **assemble one redacted alert line from a vocabulary you own**, and **strip anything that looks like record content before it ships**. About 230 lines across two files, no dependencies, nothing to install.
+Builds alert messages from caught errors without guessing at the cause or leaking the data that caused them.
 
-This exists because a sync daemon I run labelled every push failure the same way, including the hour the backend had been administratively switched off: the alert confidently named a cause it had never diagnosed, 324 times over about thirty hours, while the exception object that said the true cause in plain English was thrown away by a bare catch block. Two rules came out of fixing that, and neither was specific to the daemon: an alert must never name a cause that was not actually diagnosed, because "unclassified" is an honest verdict and a wrong specific class isn't; and exception text has exactly one permitted sink, the machine-local log, rather than being threaded into anything that leaves the process.
+```ts
+import { classifyThrow, exampleRules, exampleFallback } from "./classify-throw.ts";
+
+classifyThrow(new Error("Deployments have been disabled for this project"), exampleRules, exampleFallback);
+// { errorClass: "service_disabled", note: "service_disabled" }
+
+classifyThrow(new Error("something nobody planned for"), exampleRules, exampleFallback);
+// { errorClass: "unclassified", note: "cause_not_recognized" }
+```
+
+A sync daemon of mine labeled every push failure the same way, including the hour the backend had been switched off. The alert named a cause it had never diagnosed, 324 times over about thirty hours, while a bare catch block threw away the error that said the real cause in plain English.
 
 ## Use it if
 
-- your alerts are assembled from caught exceptions and a bare catch block decides what the cause says
+- your alerts are built from caught errors, and a bare catch block decides what the cause says
 - you want record ids in the message and never record content
 - you'd rather read "unclassified" than a confident guess
 
-## How it works
-
-`classify-throw.ts` takes whatever a try/catch handed you and turns it into a class plus a note code, using an ordered list of regex rules you supply. First match wins, so more specific causes go first in your rule list. Anything that matches nothing falls through to a fallback you also supply, rather than getting guessed at.
-
-`alert-redactor.ts` takes that class (plus optional record ids, a count, and a note) and assembles a single line of text, using a vocabulary you own: one fixed lead sentence per class, an optional set of note-code endings, and a tag that identifies the sender. Record ids that look suspicious get replaced with a placeholder before they are ever printed. An id counts as suspicious if it's longer than 128 characters or contains whitespace, since a real identifier should never need either. Only the first five ids get listed; beyond that it just says how many more there were. The whole assembled line is checked one more time before it goes out, and if that check fails, the function throws the rest away and returns the smallest line it can, naming only the class.
-
-Both halves are pure functions. Nothing here does IO, reads the network, or writes a log. What you do with the string you get back is up to you.
-
 ## Install
 
-There's no package registry entry yet. Copy `src/alert-redactor.ts` and `src/classify-throw.ts` into your project, or clone this repository and import from it directly. Both files run as-is under a TypeScript runtime that supports `.ts` imports natively, such as a recent Node.
+Copy `src/alert-redactor.ts` and `src/classify-throw.ts` into your project. They're about 230 lines with no dependencies, and run under Node 22 or newer, which reads TypeScript directly.
 
 ```sh
 git clone https://github.com/justin-rhee/alert-redactor
 cp alert-redactor/src/alert-redactor.ts alert-redactor/src/classify-throw.ts your-project/src/
-bash tests/run.sh   # 27 tests should pass
 ```
 
-Verify the copies work before you build on them: classify something your rules don't cover and confirm you get your fallback class back, not a guess.
+## How it works
+
+1. `classifyThrow` matches the error against your ordered rules, first match wins, and anything unmatched gets your fallback instead of a guess
+2. `buildAlert` turns the class into one line from a vocabulary you own: a lead sentence per class, optional endings, and a sender tag
+3. record ids longer than 128 characters or containing whitespace are replaced with a placeholder, and only the first five are listed
+4. the whole line is checked once more before it goes out, and if that fails, it returns the smallest line it can, naming only the class
+
+Both halves are pure functions with no IO. What you do with the string is up to you.
 
 ## What it won't do
 
-- stop you putting real content inside your own lead strings, since the vocabulary you hand it is trusted as-is, so a lead sentence carrying something it shouldn't is a vocabulary problem rather than something this can catch
-- recognize anything you haven't given it a rule for, so everything else falls through to your fallback, where the honest default is unclassified rather than a guess
-- keep `localDetail` out of places it shouldn't go, since it builds text meant for a local log file and nothing enforces that once you're holding the string
+- stop you putting real content in your own lead sentences, since the vocabulary you hand it is trusted as-is
+- recognize anything you haven't written a rule for, so the honest default is unclassified
+- keep `localDetail` out of places it shouldn't go, since it builds text meant for a local log and nothing enforces that afterwards
 
 ## How I tested it
 
-Every test runs under `node --test` against the TypeScript source directly, no build step. There are 27 tests across the two modules, covering the id-length and whitespace placeholder rule, the content-guard hook on both individual ids and the assembled line, the five-id cap, note-code sanitization, the classifier's five example rule families plus overlap ordering and fallback behavior, and `localDetail` bounding. Two tests plant a fake identifier and a fake exception message and check the planted text directly: one shows what naive string interpolation would leak, then shows the protected path doesn't leak it.
-
-```sh
-bash tests/run.sh
-```
-
-```
-ℹ tests 27
-ℹ pass 27
-ℹ fail 0
-```
+- 27 tests on Node's built-in runner, against the TypeScript source: `bash tests/run.sh`
+- covers the placeholder rule, the content guard on single ids and the whole line, the five-id cap, and rule ordering and fallback
+- two tests plant a fake id and a fake error message, show naive string building leaking them, then show the protected path doesn't
 
 ## License
 
-MIT. See [LICENSE](LICENSE). No warranty. Security notes and how to report a problem: [SECURITY.md](SECURITY.md). Design decisions and what changed while building it: [docs/ADR.md](docs/ADR.md).
+MIT. See [LICENSE](LICENSE). No warranty. Security notes and how to report a problem: [SECURITY.md](SECURITY.md). Design decisions: [docs/ADR.md](docs/ADR.md).
 
-This little tool is one of a handful I pulled out of my own day-to-day agent setup. I use them all myself, so when something breaks I usually notice fast. But if you run into any issues, or anything that looks off, open an issue. I read every one. More tools on my [GitHub profile](https://github.com/justin-rhee).
+<!-- related:start -->
+## Related
+
+- [alert-throttle](https://github.com/justin-rhee/alert-throttle): holds back repeat alerts and says how many it held
+- [deid-allowlist](https://github.com/justin-rhee/deid-allowlist): drops every field you didn't allow before a record leaves your machine
+
+Part of a small set of tools I pulled out of my own agent harness. I use them myself and read every issue. More on my [GitHub profile](https://github.com/justin-rhee).
+<!-- related:end -->
