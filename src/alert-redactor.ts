@@ -14,6 +14,9 @@
  * redacted, not rejected).
  */
 
+export { classifyThrow, localDetail, exampleRules, exampleFallback } from "./classify-throw.ts";
+export type { ClassifierRule, ExampleClass } from "./classify-throw.ts";
+
 /** A record spec. `errorClass` is the only thing here that names what went wrong. Everything
  *  else is an identifier or a count - never a description of the failure. */
 export type AlertSpec<C extends string> = {

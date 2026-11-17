@@ -14,10 +14,7 @@ promise the code can't keep.
 
 ## Validation status
 
-<State plainly whether this tool's tests / red-team corpus have been RUN, and
-link the results. An unrun corpus is disclosed here, in the open. never hidden
-behind a "tested" claim. Disclosure does not transfer the duty; run it before
-you rely on it.>
+The offline test suite has been run: 28 of 28 tests pass on Node 22 with `npm test` (which runs `bash tests/run.sh`). The tests cover id placeholders, the content guard, the five-id cap, rule ordering and fallback, and one check that the README example runs against the packed package. They do not cover real alert channels, real error messages from your services, or a vocabulary other than the examples. No outside red-team corpus has been run.
 
 ## Reporting a vulnerability
 
