@@ -47,8 +47,9 @@ Both halves are pure functions with no IO. What you do with the string is up to 
 
 ## How I tested it
 
-- 27 tests on Node's built-in runner, against the TypeScript source: `bash tests/run.sh`
+- 28 tests on Node's built-in runner, against the TypeScript source: `bash tests/run.sh`
 - covers the placeholder rule, the content guard on single ids and the whole line, the five-id cap, and rule ordering and fallback
+- one test packs the built package, installs it in an empty folder and runs the first example above
 - two tests plant a fake id and a fake error message, show naive string building leaking them, then show the protected path doesn't
 
 ## License
